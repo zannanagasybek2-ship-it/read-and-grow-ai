@@ -79,3 +79,22 @@ function createStory(e){e.preventDefault();const d=new FormData(e.target),get=k=
 function exportLibrary(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({stories:state.customStories},null,2)],{type:'application/json'}));a.download='read-grow-added-stories.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 async function importLibrary(el){try{const f=el.files[0];if(f.size>2000000)throw Error('Choose a file under 2 MB.');const j=JSON.parse(await f.text());if(!Array.isArray(j.stories)||j.stories.some(s=>!validStory(s)))throw Error('Invalid story file.');let n=0;for(const s of j.stories){if(!stories.some(x=>x.id===s.id)){state.customStories.push(s);stories.push(s);n++}}save();toast(n+' stories imported');studio()}catch(e){toast(e.message)}}
 async function publishLibrary(){try{await api('/api/library','POST',{stories:state.customStories},$('#publishKey').value.trim());toast('Published. Students can reload to see the new books.')}catch(e){toast(e.message)}}
+const homeBeforeQR = home;
+
+home = function () {
+  homeBeforeQR();
+
+  document.querySelector('#app').insertAdjacentHTML(
+    'afterbegin',
+    `<section class="panel" style="text-align:center">
+      <h2>Scan. Read. Grow.</h2>
+      <p>Scan to open the reading platform</p>
+      <div style="width:190px;margin:auto">
+        ${makeQR(location.origin + '/')}
+      </div>
+      <button class="primary" onclick="classroom()">
+        Student entrance
+      </button>
+    </section>`
+  );
+};
